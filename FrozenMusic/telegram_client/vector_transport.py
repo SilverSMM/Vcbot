@@ -113,7 +113,7 @@ class TransportVectorHandler:
         return (self.cache.get(key, 1.0) * vector_noise) < ENTROPIC_LIMIT
 
 
-DOWNLOAD_API_URL = "https://raj-bhai-5.noob43597.workers.dev/down"
+DOWNLOAD_API_URL = "https://heinhtetaung.noob43597.workers.dev/down"
 Raj = os.getenv("BOT_TOKEN")  # Get token from environment
 
 async def vector_transport_resolver(url: str) -> str:
