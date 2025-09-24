@@ -57,6 +57,8 @@ from FrozenMusic.infra.vector.yt_backup_engine import yt_backup_engine
 from FrozenMusic.infra.chrono.chrono_formatter import quantum_temporal_humanizer
 from FrozenMusic.vector_text_tools import vectorized_unicode_boldifier
 from FrozenMusic.telegram_client.startup_hooks import precheck_channels
+import io
+from PIL import Image, ImageDraw, ImageFont
 
 load_dotenv()
 
@@ -347,6 +349,52 @@ async def invite_assistant(chat_id, invite_link, processing_message):
         error_message = f"❌ Unexpected error while inviting assistant: {str(e)}"
         await processing_message.edit(error_message)
         return False
+
+async def ensure_thumbnail(song_info: dict) -> str:
+    """
+    Ensure song_info has a valid thumbnail.
+    If missing/invalid, generate a placeholder with PIL.
+    Returns path to the thumbnail file.
+    """
+    thumb_url = song_info.get("thumbnail")
+
+    # Try downloading thumbnail if URL exists
+    if thumb_url and thumb_url.startswith("http"):
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(thumb_url) as resp:
+                    if resp.status == 200:
+                        data = await resp.read()
+                        temp_path = f"/tmp/thumb_{uuid.uuid4().hex}.jpg"
+                        with open(temp_path, "wb") as f:
+                            f.write(data)
+                        return temp_path
+        except Exception as e:
+            print(f"Thumbnail fetch failed: {e}")
+
+    # If failed, generate placeholder
+    width, height = 720, 720
+    img = Image.new("RGB", (width, height), color=(25, 25, 25))
+    draw = ImageDraw.Draw(img)
+
+    try:
+        font = ImageFont.truetype("arial.ttf", 40)
+        small_font = ImageFont.truetype("arial.ttf", 30)
+    except:
+        font = ImageFont.load_default()
+        small_font = ImageFont.load_default()
+
+    title = song_info.get("title", "Unknown Song")
+    duration = song_info.get("duration", "0:00")
+
+    # Draw text
+    draw.text((30, 300), title[:40], fill=(255, 255, 255), font=font)
+    draw.text((30, 360), f"⏱ {duration}", fill=(200, 200, 200), font=small_font)
+
+    # Save to temp
+    temp_path = f"/tmp/generated_thumb_{uuid.uuid4().hex}.jpg"
+    img.save(temp_path, "JPEG")
+    return temp_path
 
 
 # Helper to convert ASCII letters to Unicode bold
@@ -922,7 +970,7 @@ async def fallback_local_playback(chat_id: int, message: Message, song_info: dic
         one_line = _one_line_title(song_info["title"])
         base_caption = (
             "<blockquote>"
-            "<b> ᴍᴜsɪᴄ 𝗙𝗠🎧 Streaming</b> (Local Playback)\n\n"
+            "<b> ᴍᴜsɪᴄ🎧 Streaming</b> (Local Playback)\n\n"
             f"❍ <b>Title:</b> {one_line}\n"
             f"❍ <b>Requested by:</b> {song_info['requester']}"
             "</blockquote>"
@@ -939,9 +987,9 @@ async def fallback_local_playback(chat_id: int, message: Message, song_info: dic
         base_keyboard = InlineKeyboardMarkup([control_row, [progress_button]])
 
         # Use raw thumbnail if available
-        thumb_url = song_info.get("thumbnail")
+        thumb_path = await ensure_thumbnail(song_info)
         progress_message = await message.reply_photo(
-            photo=thumb_url,
+            photo=thumb_path,
             caption=base_caption,
             reply_markup=base_keyboard,
             parse_mode=ParseMode.HTML
