@@ -447,7 +447,7 @@ async def start_handler(_, message):
     reply_markup = InlineKeyboardMarkup(buttons)
 
     await message.reply_animation(
-        animation="https://frozen-imageapi.lagendplayersyt.workers.dev/file/2e483e17-05cb-45e2-b166-1ea476ce9521.mp4",
+        animation="https://frozen-imageapi.lagendplayersyt.workers.dev/file/5514ebb5-c01d-4488-89a6-10cd5d0dcee6.mp4",
         caption=caption,
         parse_mode=ParseMode.MARKDOWN,
         reply_markup=reply_markup
@@ -685,7 +685,7 @@ async def play_handler(_, message: Message):
 
 async def process_play_command(message: Message, query: str):
     chat_id = message.chat.id
-    processing_message = await message.reply("❄️")
+    processing_message = await message.reply("🤙")
 
     # --- ensure assistant is in the chat before we queue/play anything ----
     status = await is_assistant_in_chat(chat_id)
@@ -862,8 +862,8 @@ def format_time(seconds: float) -> str:
 def get_progress_bar_styled(elapsed: float, total: float, bar_length: int = 14) -> str:
     """
     Build a progress bar string in the style:
-      elapsed_time  <dashes>❄️<dashes>  total_time
-    For example: 0:30 —❄️———— 3:09
+      elapsed_time  <dashes>•<dashes>  total_time
+    For example: 0:30 —•———— 3:09
     """
     if total <= 0:
         return "Progress: N/A"
@@ -873,7 +873,7 @@ def get_progress_bar_styled(elapsed: float, total: float, bar_length: int = 14) 
         marker_index = bar_length - 1
     left = "━" * marker_index
     right = "─" * (bar_length - marker_index - 1)
-    bar = left + "❄️" + right
+    bar = left + "•" + right
     return f"{format_time(elapsed)} {bar} {format_time(total)}"
 
 
@@ -902,7 +902,7 @@ async def update_progress_caption(
             InlineKeyboardButton(text="▢", callback_data="stop")
         ]
         progress_button = InlineKeyboardButton(text=progress_bar, callback_data="progress")
-        playlist_button = InlineKeyboardButton(text="➕ᴀᴅᴅ тσ ρℓαυℓιѕт➕", callback_data="add_to_playlist")
+        playlist_button = InlineKeyboardButton(text="Good Music Save Bad Days🫀", callback_data="add_to_playlist")
 
         new_keyboard = InlineKeyboardMarkup([
             control_row,
@@ -950,11 +950,11 @@ async def fallback_local_playback(chat_id: int, message: Message, song_info: dic
 
         # Notify
         try:
-            await message.edit(f"Starting local playback for ⚡ {song_info['title']}...")
+            await message.edit(f"Starting playing for 🫀\n{song_info['title']}...")
         except Exception:
             message = await bot.send_message(
                 chat_id,
-                f"Starting local playback for ⚡ {song_info['title']}..."
+                f"Starting playing for 🫀\n{song_info['title']}..."
             )
 
         # Download & play locally
@@ -970,9 +970,10 @@ async def fallback_local_playback(chat_id: int, message: Message, song_info: dic
         one_line = _one_line_title(song_info["title"])
         base_caption = (
             "<blockquote>"
-            "<b> ᴍᴜsɪᴄ🎧 Streaming</b> (Local Playback)\n\n"
+            "<b> ᴍᴜsɪᴄ🎧 Streaming</b>\n\n"
             f"❍ <b>Title:</b> {one_line}\n"
-            f"❍ <b>Requested by:</b> {song_info['requester']}"
+            f"❍ <b>Requested by:</b> {song_info['requester']}\n"
+            f"❍ <b>Made By:</b>@S03US"
             "</blockquote>"
         )
         initial_progress = get_progress_bar_styled(0, total_duration)
