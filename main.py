@@ -270,7 +270,7 @@ def iso8601_to_human_readable(iso_duration):
 
 async def fetch_youtube_link(query):
     try:
-        url = f"https://search-api.kustbotsweb.workers.dev/search?q={query}"
+        url = f"https://heinhtetaungsearch-paid.noobop00111.workers.dev/search?q={query}"
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 if response.status == 200:
